@@ -20,11 +20,34 @@ body::before{content:'';position:fixed;inset:0;
   background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(47,129,247,.08),transparent);
   pointer-events:none;z-index:0}
 
+/* ── Modal overlay ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;
+  display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.hidden{display:none}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:28px;max-width:520px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.modal h2{font-size:18px;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.modal .sub{font-size:13px;color:var(--muted);margin-bottom:22px;line-height:1.6}
+.modal .sub a{color:#79b8ff;text-decoration:none}
+.modal .sub a:hover{text-decoration:underline}
+.modal label{display:block;font-size:12px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px}
+.key-input-wrap{display:flex;gap:8px;margin-bottom:14px}
+.key-input{flex:1;background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-family:'Space Mono',monospace;
+  font-size:13px;padding:10px 14px;outline:none;transition:border-color .2s}
+.key-input:focus{border-color:var(--accent)}
+.key-input::placeholder{color:var(--muted)}
+.modal-note{background:rgba(227,179,65,.08);border:1px solid rgba(227,179,65,.25);
+  border-radius:8px;padding:11px 14px;font-size:12px;color:var(--gold);line-height:1.6;margin-bottom:20px}
+.modal-note strong{display:block;margin-bottom:3px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+
 /* ── Layout ── */
 .wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:28px 20px 64px}
 
 /* ── Header ── */
-.header{display:flex;align-items:center;gap:14px;margin-bottom:28px;
+.header{display:flex;align-items:center;gap:14px;margin-bottom:24px;
   padding-bottom:20px;border-bottom:1px solid var(--border)}
 .logo{width:44px;height:44px;border-radius:11px;
   background:linear-gradient(135deg,#1f6feb,var(--accent));
@@ -32,21 +55,34 @@ body::before{content:'';position:fixed;inset:0;
   box-shadow:0 0 20px var(--accent-glow);flex-shrink:0}
 .header-text h1{font-size:19px;font-weight:800;letter-spacing:-.3px}
 .header-text p{font-size:12px;color:var(--muted);margin-top:2px}
+.key-pill{margin-left:auto;display:flex;align-items:center;gap:8px;
+  border:1px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;
+  background:var(--surface);transition:all .2s;flex-shrink:0}
+.key-pill:hover{border-color:var(--accent)}
+.key-pill .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.key-pill .dot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
+.key-pill .dot.warn{background:var(--red);box-shadow:0 0 6px var(--red)}
+.key-pill span{font-size:12px;font-weight:600}
+
+/* ── Status bar ── */
+.api-status{border-radius:10px;padding:12px 16px;margin-bottom:20px;
+  font-size:13px;line-height:1.6;display:flex;gap:10px;align-items:flex-start}
+.api-status.ok{background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.3);color:var(--green)}
+.api-status.warn{background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.3);color:#ffa198}
+.api-status.info{background:rgba(47,129,247,.08);border:1px solid rgba(47,129,247,.25);color:#79b8ff}
 
 /* ── Tabs ── */
 .tabs{display:flex;gap:4px;margin-bottom:22px;
   background:var(--surface);border:1px solid var(--border);
   border-radius:10px;padding:4px;width:fit-content}
-.tab{padding:8px 22px;border-radius:7px;border:none;cursor:pointer;
-  font-family:'Be Vietnam Pro',sans-serif;font-size:13px;font-weight:600;
+.tab{padding:8px 20px;border-radius:7px;border:none;cursor:pointer;
+  font-family:'Be Vietnam Pro',sans-serif;font-size:12.5px;font-weight:600;
   transition:all .2s;color:var(--muted);background:transparent}
 .tab.active{background:var(--accent);color:#fff;box-shadow:0 2px 10px var(--accent-glow)}
 .tab:not(.active):hover{color:var(--text);background:var(--surface2)}
+.tab-panel{display:none}.tab-panel.active{display:block}
 
-.tab-panel{display:none}
-.tab-panel.active{display:block}
-
-/* ── Two-col grid ── */
+/* ── Grid ── */
 .grid{display:grid;grid-template-columns:380px 1fr;gap:20px;align-items:start}
 @media(max-width:860px){.grid{grid-template-columns:1fr}}
 
@@ -54,30 +90,31 @@ body::before{content:'';position:fixed;inset:0;
 .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
 .card-head{padding:11px 16px;background:var(--surface2);border-bottom:1px solid var(--border);
   display:flex;align-items:center;justify-content:space-between;gap:10px}
-.card-title{font-size:11.5px;font-weight:700;color:var(--muted);
+.card-title{font-size:11px;font-weight:700;color:var(--muted);
   text-transform:uppercase;letter-spacing:.7px;display:flex;align-items:center;gap:6px}
 .card-body{padding:16px}
 
-/* ── Upload zone ── */
-.drop{border:2px dashed var(--border);border-radius:10px;
-  background:var(--surface2);padding:36px 18px;text-align:center;
-  cursor:pointer;transition:all .2s}
-.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-glow)}
-.drop .ico{font-size:34px;margin-bottom:10px}
-.drop h3{font-size:14px;font-weight:600;margin-bottom:4px}
+/* ── Drop zone ── */
+.drop{border:2px dashed var(--border);border-radius:10px;background:var(--surface2);
+  padding:36px 18px;text-align:center;cursor:pointer;transition:all .2s}
+.drop:hover,.drop.over{border-color:var(--accent);background:rgba(47,129,247,.06)}
+.drop .ico{font-size:32px;margin-bottom:10px}
+.drop h3{font-size:13.5px;font-weight:600;margin-bottom:4px}
 .drop p{font-size:12px;color:var(--muted);line-height:1.5}
 .drop input{display:none}
 
-/* queue */
+/* ── Queue ── */
 .queue{display:flex;flex-direction:column;gap:5px;margin-top:11px}
-.qi{display:flex;align-items:center;gap:8px;padding:6px 10px;
-  background:var(--surface2);border:1px solid var(--border);border-radius:7px}
-.qi .qn{flex:1;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);
+.qi{padding:7px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:7px}
+.qi-row{display:flex;align-items:center;gap:8px;width:100%}
+.qi .qn{flex:1;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.qbadge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700}
-.qbadge.p{background:#2d2f0e;color:#e3b341}
+.qbadge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700;flex-shrink:0}
+.qbadge.p{background:#2d2f0e;color:var(--gold)}
 .qbadge.d{background:#0d2118;color:var(--green)}
 .qbadge.e{background:#2d1117;color:var(--red)}
+.qi-err{font-size:11px;color:#ffa198;margin-top:5px;padding-top:5px;
+  border-top:1px solid rgba(248,81,73,.2);line-height:1.5;word-break:break-word}
 
 /* ── Buttons ── */
 .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;
@@ -87,22 +124,21 @@ body::before{content:'';position:fixed;inset:0;
   margin-top:12px;padding:11px;box-shadow:0 3px 12px var(--accent-glow)}
 .btn-blue:hover{filter:brightness(1.12);transform:translateY(-1px)}
 .btn-blue:disabled{opacity:.45;cursor:not-allowed;transform:none;filter:none}
-.btn-green{background:var(--green);color:#0d1117;font-weight:700;
-  box-shadow:0 3px 12px var(--green-glow)}
+.btn-green{background:var(--green);color:#0d1117;font-weight:700;box-shadow:0 3px 12px var(--green-glow)}
 .btn-green:hover{transform:translateY(-1px);filter:brightness(1.1)}
 .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
 .btn-sm{padding:5px 12px;font-size:12px}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap}
 
-/* ── Status ── */
+/* ── Status msg ── */
 .status{margin-top:13px;padding:11px 14px;border-radius:var(--radius);
-  font-size:12.5px;display:flex;align-items:flex-start;gap:9px;line-height:1.5}
+  font-size:12.5px;display:flex;align-items:flex-start;gap:9px;line-height:1.6}
 .status.loading{background:rgba(47,129,247,.1);border:1px solid rgba(47,129,247,.25);color:#79b8ff}
-.status.error{background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.25);color:#ffa198}
+.status.error{background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);color:#ffa198}
 .status.success{background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.25);color:var(--green)}
 .spinner{width:14px;height:14px;border:2px solid rgba(121,184,255,.3);
-  border-top-color:#79b8ff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;margin-top:1px}
+  border-top-color:#79b8ff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;margin-top:2px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── Stats ── */
@@ -113,7 +149,6 @@ body::before{content:'';position:fixed;inset:0;
   color:var(--accent);line-height:1;margin-bottom:3px}
 .stat-l{font-size:11px;color:var(--muted)}
 
-/* ── Right column ── */
 .right{display:flex;flex-direction:column;gap:16px}
 
 /* ── Table ── */
@@ -146,26 +181,71 @@ tbody tr:hover .del-btn{color:var(--red)}
 .del-btn:hover{background:rgba(248,81,73,.12)}
 
 .empty{text-align:center;padding:48px 20px;color:var(--muted)}
-.empty .ico{font-size:34px;margin-bottom:10px;opacity:.4}
+.empty .ico{font-size:32px;margin-bottom:10px;opacity:.4}
 .empty p{font-size:12.5px;line-height:1.6}
 
-/* ── Export bar ── */
 .export-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;
   padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .exp-info{font-size:12.5px;color:var(--muted)}
 .exp-info strong{color:var(--text);font-weight:700}
+
+/* eye toggle */
+.eye-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;
+  padding:0 4px;transition:color .15s;flex-shrink:0}
+.eye-btn:hover{color:var(--text)}
 </style>
 </head>
 <body>
+
+<!-- ══════════════ API KEY MODAL ══════════════ -->
+<div class="modal-overlay" id="keyModal">
+  <div class="modal">
+    <h2>🔑 Cấu hình API Key</h2>
+    <p class="sub">
+      Key được lưu vào <strong>localStorage</strong> của trình duyệt —
+      <strong>không nằm trong code, không bị lộ lên GitHub.</strong><br/>
+      Lấy key tại: <a href="https://console.anthropic.com/account/keys" target="_blank">console.anthropic.com/account/keys</a>
+    </p>
+
+    <div class="modal-note">
+      <strong>⚠️ Tài khoản free KHÔNG dùng được API!</strong>
+      Anthropic yêu cầu nạp tối thiểu <strong>$5 credit</strong> tại
+      <a href="https://console.anthropic.com/settings/billing" target="_blank" style="color:var(--gold)">console.anthropic.com/settings/billing</a>
+      trước khi API hoạt động.
+    </div>
+
+    <label>Anthropic API Key</label>
+    <div class="key-input-wrap">
+      <input class="key-input" id="keyInput" type="password" placeholder="sk-ant-api03-..." autocomplete="off"/>
+      <button class="eye-btn" id="eyeBtn" title="Hiện/ẩn key">👁</button>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modalCancelBtn">Hủy</button>
+      <button class="btn btn-blue" style="width:auto;margin-top:0" id="modalSaveBtn">💾 Lưu & Bắt đầu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ MAIN APP ══════════════ -->
 <div class="wrap">
 
-  <!-- Header -->
   <div class="header">
     <div class="logo">🏢</div>
     <div class="header-text">
       <h1>Trích Xuất Doanh Nghiệp</h1>
       <p>Tải ảnh → AI phân tích → Xuất Excel · Powered by Claude AI</p>
     </div>
+    <div class="key-pill" id="keyPill" onclick="openModal()">
+      <div class="dot warn" id="pillDot"></div>
+      <span id="pillText">Chưa có key</span>
+    </div>
+  </div>
+
+  <!-- API Status -->
+  <div class="api-status warn" id="apiStatus">
+    <span>⚠️</span>
+    <span id="apiStatusText">Chưa có API Key. Nhấn <strong>"Chưa có key"</strong> ở góc phải để cài đặt.</span>
   </div>
 
   <!-- Tabs -->
@@ -174,10 +254,9 @@ tbody tr:hover .del-btn{color:var(--red)}
     <button class="tab"        onclick="switchTab(2)">📇 Tab 2 · Thông tin liên hệ (Tên CT · SĐT · Email)</button>
   </div>
 
-  <!-- ══════════════════════════════════ TAB 1 ══════════════════════════════════ -->
+  <!-- TAB 1 -->
   <div class="tab-panel active" id="tab1">
     <div class="grid">
-      <!-- LEFT -->
       <div>
         <div class="card">
           <div class="card-head"><span class="card-title">🖼 Nguồn ảnh</span></div>
@@ -185,7 +264,7 @@ tbody tr:hover .del-btn{color:var(--red)}
             <div class="drop" id="drop1">
               <div class="ico">📂</div>
               <h3>Kéo thả hoặc click để chọn ảnh</h3>
-              <p>JPG · PNG · WEBP<br/>Chọn nhiều ảnh cùng lúc</p>
+              <p>JPG · PNG · WEBP — Chọn nhiều ảnh cùng lúc</p>
               <input type="file" id="fi1" accept="image/*" multiple/>
             </div>
             <div class="queue" id="queue1"></div>
@@ -194,15 +273,12 @@ tbody tr:hover .del-btn{color:var(--red)}
         </div>
         <div class="status" id="status1" style="display:none"></div>
       </div>
-
-      <!-- RIGHT -->
       <div class="right">
         <div class="stats">
           <div class="stat"><div class="stat-n" id="t1-total">0</div><div class="stat-l">Bản ghi</div></div>
           <div class="stat"><div class="stat-n" id="t1-hn">0</div><div class="stat-l">Hà Nội</div></div>
           <div class="stat"><div class="stat-n" id="t1-hcm">0</div><div class="stat-l">HCM</div></div>
         </div>
-
         <div class="card">
           <div class="card-head">
             <span class="card-title">📊 Kết quả</span>
@@ -212,18 +288,15 @@ tbody tr:hover .del-btn{color:var(--red)}
             </div>
           </div>
           <div class="tbl-wrap">
-            <table>
-              <thead><tr>
-                <th class="n">#</th>
-                <th>Thời gian</th><th>Mã số DN</th><th>Tên Công ty</th><th>Tỉnh / TP</th><th></th>
-              </tr></thead>
-              <tbody id="tbody1">
-                <tr><td colspan="6"><div class="empty"><div class="ico">🔍</div><p>Chưa có dữ liệu<br/>Tải ảnh và nhấn Phân tích</p></div></td></tr>
-              </tbody>
-            </table>
+            <table><thead><tr>
+              <th class="n">#</th>
+              <th>Thời gian</th><th>Mã số DN</th><th>Tên Công ty</th><th>Tỉnh / TP</th><th></th>
+            </tr></thead>
+            <tbody id="tbody1">
+              <tr><td colspan="6"><div class="empty"><div class="ico">🔍</div><p>Chưa có dữ liệu</p></div></td></tr>
+            </tbody></table>
           </div>
         </div>
-
         <div class="export-bar">
           <div class="exp-info">Xuất: <strong id="exp1-count">0</strong> bản ghi</div>
           <div class="btn-row">
@@ -235,10 +308,9 @@ tbody tr:hover .del-btn{color:var(--red)}
     </div>
   </div>
 
-  <!-- ══════════════════════════════════ TAB 2 ══════════════════════════════════ -->
+  <!-- TAB 2 -->
   <div class="tab-panel" id="tab2">
     <div class="grid">
-      <!-- LEFT -->
       <div>
         <div class="card">
           <div class="card-head"><span class="card-title">🖼 Nguồn ảnh</span></div>
@@ -246,7 +318,7 @@ tbody tr:hover .del-btn{color:var(--red)}
             <div class="drop" id="drop2">
               <div class="ico">📂</div>
               <h3>Kéo thả hoặc click để chọn ảnh</h3>
-              <p>JPG · PNG · WEBP<br/>Chọn nhiều ảnh cùng lúc</p>
+              <p>JPG · PNG · WEBP — Chọn nhiều ảnh cùng lúc</p>
               <input type="file" id="fi2" accept="image/*" multiple/>
             </div>
             <div class="queue" id="queue2"></div>
@@ -255,15 +327,12 @@ tbody tr:hover .del-btn{color:var(--red)}
         </div>
         <div class="status" id="status2" style="display:none"></div>
       </div>
-
-      <!-- RIGHT -->
       <div class="right">
         <div class="stats">
           <div class="stat"><div class="stat-n" id="t2-total">0</div><div class="stat-l">Bản ghi</div></div>
           <div class="stat"><div class="stat-n" id="t2-phone">0</div><div class="stat-l">Có SĐT</div></div>
           <div class="stat"><div class="stat-n" id="t2-email">0</div><div class="stat-l">Có Email</div></div>
         </div>
-
         <div class="card">
           <div class="card-head">
             <span class="card-title">📊 Kết quả</span>
@@ -273,18 +342,15 @@ tbody tr:hover .del-btn{color:var(--red)}
             </div>
           </div>
           <div class="tbl-wrap">
-            <table>
-              <thead><tr>
-                <th class="n">#</th>
-                <th>Tên Công ty</th><th>Điện thoại</th><th>Email</th><th></th>
-              </tr></thead>
-              <tbody id="tbody2">
-                <tr><td colspan="5"><div class="empty"><div class="ico">🏢</div><p>Chưa có dữ liệu<br/>Tải ảnh và nhấn Phân tích</p></div></td></tr>
-              </tbody>
-            </table>
+            <table><thead><tr>
+              <th class="n">#</th>
+              <th>Tên Công ty</th><th>Điện thoại</th><th>Email</th><th></th>
+            </tr></thead>
+            <tbody id="tbody2">
+              <tr><td colspan="5"><div class="empty"><div class="ico">🏢</div><p>Chưa có dữ liệu</p></div></td></tr>
+            </tbody></table>
           </div>
         </div>
-
         <div class="export-bar">
           <div class="exp-info">Xuất: <strong id="exp2-count">0</strong> bản ghi</div>
           <div class="btn-row">
@@ -296,118 +362,169 @@ tbody tr:hover .del-btn{color:var(--red)}
     </div>
   </div>
 
-</div><!-- /wrap -->
+</div>
 
 <script>
-// ╔══════════════════════════════════════════════════════╗
-// ║          ⚙️  CẤU HÌNH — ĐIỀN API KEY VÀO ĐÂY        ║
-// ╚══════════════════════════════════════════════════════╝
-const ANTHROPIC_API_KEY = "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";
-//  👆 Thay bằng key của bạn tại: console.anthropic.com/account/keys
-// ════════════════════════════════════════════════════════
+const STORAGE_KEY = 'dn_extractor_apikey';
+const PROMPT1 = `Phân tích ảnh và trích xuất thông tin các doanh nghiệp. Trả về JSON thuần (không markdown, không backtick), mảng objects:\n[{"thoiGian":"20/03/2026 1:11:48 CH","maSoDN":"0111421236","tenCT":"CÔNG TY TNHH ...","tinhTP":"Thành phố Hà Nội"}]\nChỉ trả JSON.`;
+const PROMPT2 = `Phân tích ảnh (công bố thành lập DN hoặc danh sách DN). Trích xuất: tên công ty đầy đủ, số điện thoại (chỉ SĐT chính, không lấy Fax), email. Trả về JSON thuần (không markdown):\n[{"tenCT":"Tên đầy đủ","dienThoai":"0348224001","email":"abc@gmail.com"}]\nNếu không có SĐT/email thì để "". Chỉ trả JSON.`;
 
-const PROMPT1 = `Phân tích ảnh và trích xuất thông tin các doanh nghiệp. Trả về JSON thuần (không markdown, không backtick), mảng objects:
-[{"thoiGian":"20/03/2026 1:11:48 CH","maSoDN":"0111421236","tenCT":"CÔNG TY TNHH ...","tinhTP":"Thành phố Hà Nội"}]
-Chỉ trả JSON.`;
+const state = { 1:{rows:[],queue:[]}, 2:{rows:[],queue:[]} };
 
-const PROMPT2 = `Phân tích ảnh (công bố thành lập DN hoặc danh sách DN). Trích xuất: tên công ty, số điện thoại (không lấy Fax), email. Trả về JSON thuần (không markdown):
-[{"tenCT":"Tên đầy đủ","dienThoai":"0348224001","email":"abc@gmail.com"}]
-Nếu không có SĐT/email để chuỗi rỗng. Chỉ trả JSON.`;
+// ── Modal ──
+const keyModal   = document.getElementById('keyModal');
+const keyInput   = document.getElementById('keyInput');
+const eyeBtn     = document.getElementById('eyeBtn');
+const modalSave  = document.getElementById('modalSaveBtn');
+const modalCancel= document.getElementById('modalCancelBtn');
 
-// State
-const state = {
-  1: { rows: [], queue: [] },
-  2: { rows: [], queue: [] }
-};
-
-// Tab switch
-function switchTab(n) {
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active', i===n-1));
-  document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active', i===n-1));
-}
-
-// ── Setup drop zones ──
-[1,2].forEach(n => {
-  const drop = document.getElementById('drop'+n);
-  const fi   = document.getElementById('fi'+n);
-  drop.addEventListener('dragover', e=>{e.preventDefault();drop.classList.add('over')});
-  drop.addEventListener('dragleave', ()=>drop.classList.remove('over'));
-  drop.addEventListener('drop', e=>{
-    e.preventDefault();drop.classList.remove('over');
-    addFiles(n, Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/')));
-  });
-  drop.addEventListener('click', ()=>fi.click());
-  fi.addEventListener('change', e=>{addFiles(n, Array.from(e.target.files));fi.value='';});
+eyeBtn.addEventListener('click',()=>{
+  keyInput.type = keyInput.type==='password'?'text':'password';
+  eyeBtn.textContent = keyInput.type==='password'?'👁':'🙈';
 });
 
-function addFiles(n, files) {
-  files.forEach(f=>state[n].queue.push({file:f,status:'pending'}));
-  renderQueue(n);
-  document.getElementById('extractBtn'+n).disabled = state[n].queue.length===0;
+function openModal(){
+  const saved = localStorage.getItem(STORAGE_KEY)||'';
+  keyInput.value = saved;
+  keyModal.classList.remove('hidden');
 }
 
-function renderQueue(n) {
-  const el = document.getElementById('queue'+n);
-  el.innerHTML = '';
+function closeModal(){ keyModal.classList.add('hidden'); }
+
+modalCancel.addEventListener('click', closeModal);
+keyModal.addEventListener('click', e=>{ if(e.target===keyModal) closeModal(); });
+
+modalSave.addEventListener('click',()=>{
+  const val = keyInput.value.trim();
+  if(!val){ alert('Vui lòng nhập API Key!'); return; }
+  localStorage.setItem(STORAGE_KEY, val);
+  closeModal();
+  updateKeyUI();
+});
+
+function getKey(){ return localStorage.getItem(STORAGE_KEY)||''; }
+
+function updateKeyUI(){
+  const key = getKey();
+  const dot  = document.getElementById('pillDot');
+  const text = document.getElementById('pillText');
+  const statusEl  = document.getElementById('apiStatus');
+  const statusTxt = document.getElementById('apiStatusText');
+
+  if(!key){
+    dot.className='dot warn'; text.textContent='Chưa có key';
+    statusEl.className='api-status warn';
+    statusTxt.innerHTML='⚠️ Chưa có API Key. Nhấn <strong>"Chưa có key"</strong> ở góc phải để cài đặt.';
+  } else if(!key.startsWith('sk-ant-')){
+    dot.className='dot warn'; text.textContent='Key sai định dạng';
+    statusEl.className='api-status warn';
+    statusTxt.innerHTML='❌ Key không đúng định dạng (phải bắt đầu <code style="font-family:Space Mono,monospace;background:rgba(255,255,255,.1);padding:1px 5px;border-radius:3px">sk-ant-</code>). Nhấn vào pill để sửa.';
+  } else {
+    dot.className='dot ok'; text.textContent='Key đã cài ✓';
+    statusEl.className='api-status ok';
+    statusTxt.innerHTML='✅ API Key đã cấu hình. Tải ảnh lên và nhấn <strong>Bắt đầu phân tích</strong>. <em style="color:var(--gold)">Lưu ý: Tài khoản phải có credit để dùng API.</em>';
+  }
+}
+
+// On load: show modal if no key, else just update UI
+window.addEventListener('DOMContentLoaded',()=>{
+  if(!getKey()) openModal();
+  else { closeModal(); updateKeyUI(); }
+});
+
+// ── Tab switch ──
+function switchTab(n){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n-1));
+  document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===n-1));
+}
+
+// ── Drop zones ──
+[1,2].forEach(n=>{
+  const drop=document.getElementById('drop'+n);
+  const fi=document.getElementById('fi'+n);
+  drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over')});
+  drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+  drop.addEventListener('drop',e=>{
+    e.preventDefault();drop.classList.remove('over');
+    addFiles(n,Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/')));
+  });
+  drop.addEventListener('click',()=>fi.click());
+  fi.addEventListener('change',e=>{addFiles(n,Array.from(e.target.files));fi.value='';});
+});
+
+function addFiles(n,files){
+  files.forEach(f=>state[n].queue.push({file:f,status:'pending',errMsg:''}));
+  renderQueue(n);
+  document.getElementById('extractBtn'+n).disabled=state[n].queue.length===0;
+}
+
+function renderQueue(n){
+  const el=document.getElementById('queue'+n);
+  el.innerHTML='';
   state[n].queue.forEach((item,i)=>{
-    const d = document.createElement('div');
-    d.className='qi';
-    const icon = item.status==='done'?'✅':item.status==='error'?'❌':'🖼';
-    const label = item.status==='done'?'Xong':item.status==='error'?'Lỗi':'Chờ';
-    const cls = item.status==='done'?'d':item.status==='error'?'e':'p';
-    d.innerHTML=`<span style="font-size:14px">${icon}</span>
+    const d=document.createElement('div');d.className='qi';
+    const icon=item.status==='done'?'✅':item.status==='error'?'❌':'🖼';
+    const label=item.status==='done'?'Xong':item.status==='error'?'Lỗi':'Chờ';
+    const cls=item.status==='done'?'d':item.status==='error'?'e':'p';
+    const errHtml=item.status==='error'&&item.errMsg
+      ?`<div class="qi-err">⚠ ${esc(item.errMsg)}</div>`:'';
+    d.innerHTML=`<div class="qi-row">
+      <span style="font-size:14px;flex-shrink:0">${icon}</span>
       <span class="qn">${item.file.name}</span>
       <span class="qbadge ${cls}">${label}</span>
-      ${item.status==='pending'?`<button onclick="removeFile(${n},${i})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px">✕</button>`:''}`;
+      ${item.status==='pending'?`<button onclick="removeFile(${n},${i})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px;flex-shrink:0">✕</button>`:''}
+    </div>${errHtml}`;
     el.appendChild(d);
   });
 }
 
-window.removeFile = function(n,i){ state[n].queue.splice(i,1); renderQueue(n); document.getElementById('extractBtn'+n).disabled=state[n].queue.length===0; };
+window.removeFile=function(n,i){
+  state[n].queue.splice(i,1);renderQueue(n);
+  document.getElementById('extractBtn'+n).disabled=state[n].queue.length===0;
+};
 
 // ── Extract ──
-[1,2].forEach(n=>{
-  document.getElementById('extractBtn'+n).addEventListener('click', ()=>runExtract(n));
-});
+[1,2].forEach(n=>document.getElementById('extractBtn'+n).addEventListener('click',()=>runExtract(n)));
 
-async function runExtract(n) {
-  const key = ANTHROPIC_API_KEY;
-  if (!key || key.includes('REPLACE-ME')) {
-    showStatus(n,'error','❌ Chưa cấu hình API Key! Mở file HTML, tìm dòng ANTHROPIC_API_KEY và điền key vào.');
+async function runExtract(n){
+  const key=getKey();
+  if(!key||!key.startsWith('sk-ant-')){
+    openModal();
+    showStatus(n,'error','❌ Cần cấu hình API Key trước!');
     return;
   }
-  const pending = state[n].queue.filter(f=>f.status==='pending');
-  if (!pending.length) return;
-  document.getElementById('extractBtn'+n).disabled = true;
+  const pending=state[n].queue.filter(f=>f.status==='pending');
+  if(!pending.length)return;
+  document.getElementById('extractBtn'+n).disabled=true;
 
-  for (let i=0; i<state[n].queue.length; i++) {
-    const item = state[n].queue[i];
-    if (item.status !== 'pending') continue;
-    showStatus(n,'loading',`🔍 Phân tích: ${item.file.name} (${i+1}/${state[n].queue.length})...`);
-    try {
-      const b64 = await toBase64(item.file);
-      const prompt = n===1 ? PROMPT1 : PROMPT2;
-      const extracted = await callClaude(key, b64, item.file.type||'image/png', prompt);
+  for(let i=0;i<state[n].queue.length;i++){
+    const item=state[n].queue[i];
+    if(item.status!=='pending')continue;
+    showStatus(n,'loading',`🔍 Đang phân tích: ${item.file.name} (${i+1}/${state[n].queue.length})...`);
+    try{
+      const b64=await toBase64(item.file);
+      const extracted=await callClaude(key,b64,item.file.type||'image/png',n===1?PROMPT1:PROMPT2);
       state[n].rows.push(...extracted);
-      item.status='done';
-    } catch(err) {
-      item.status='error';
-      console.error(err);
+      item.status='done';item.errMsg='';
+    }catch(err){
+      item.status='error';item.errMsg=err.message||String(err);
+      console.error(item.file.name, err);
     }
     renderQueue(n);
   }
 
-  renderTable(n); updateStats(n);
-  const done = state[n].queue.filter(f=>f.status==='done').length;
-  const err  = state[n].queue.filter(f=>f.status==='error').length;
-  showStatus(n, err===0?'success':'error',
-    err===0
-      ? `✅ Hoàn tất! Trích xuất ${state[n].rows.length} bản ghi từ ${done} ảnh.`
-      : `⚠️ ${done} ảnh thành công, ${err} ảnh lỗi. Tổng: ${state[n].rows.length} bản ghi.`);
-  document.getElementById('extractBtn'+n).disabled = false;
+  renderTable(n);updateStats(n);
+  const done=state[n].queue.filter(f=>f.status==='done').length;
+  const errs=state[n].queue.filter(f=>f.status==='error');
+  if(errs.length===0){
+    showStatus(n,'success',`✅ Xong! Trích xuất ${state[n].rows.length} bản ghi từ ${done} ảnh.`);
+  }else{
+    showStatus(n,'error',`⚠️ ${done} ảnh OK · ${errs.length} ảnh lỗi · Tổng: ${state[n].rows.length} bản ghi.\nLỗi: ${errs[0].errMsg}`);
+  }
+  document.getElementById('extractBtn'+n).disabled=false;
 }
 
-async function toBase64(file) {
+async function toBase64(file){
   return new Promise((res,rej)=>{
     const r=new FileReader();
     r.onload=ev=>res(ev.target.result.split(',')[1]);
@@ -416,87 +533,95 @@ async function toBase64(file) {
   });
 }
 
-async function callClaude(apiKey, base64, mediaType, prompt) {
-  const res = await fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{
-      'Content-Type':'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version':'2023-06-01',
-      'anthropic-dangerous-direct-browser-access':'true'
-    },
-    body: JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:4000,
-      messages:[{
-        role:'user',
-        content:[
+async function callClaude(apiKey,base64,mediaType,prompt){
+  let res;
+  try{
+    res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:4000,
+        messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
           {type:'text',text:prompt}
-        ]
-      }]
-    })
-  });
-  if (!res.ok) { const e=await res.json(); throw new Error(e.error?.message||`HTTP ${res.status}`); }
-  const data = await res.json();
-  const raw = data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
-  const parsed = JSON.parse(raw);
-  if (!Array.isArray(parsed)) throw new Error('AI không trả về mảng dữ liệu');
+        ]}]
+      })
+    });
+  }catch(netErr){
+    throw new Error(`Lỗi mạng: ${netErr.message}`);
+  }
+  if(!res.ok){
+    let body;try{body=await res.json();}catch{body={};}
+    const m=body?.error?.message||`HTTP ${res.status}`;
+    if(res.status===401)throw new Error(`API Key không hợp lệ (401) — kiểm tra lại key hoặc revoke & tạo key mới.`);
+    if(res.status===429)throw new Error(`Vượt giới hạn request (429) — chờ vài giây rồi thử lại.`);
+    if(res.status===400)throw new Error(`Request lỗi (400): ${m}`);
+    if(res.status===403)throw new Error(`Không có quyền truy cập (403) — tài khoản cần nạp credit tại console.anthropic.com/settings/billing`);
+    throw new Error(`Lỗi API (${res.status}): ${m}`);
+  }
+  const data=await res.json();
+  const raw=data.content.map(b=>b.text||'').join('').replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+  let parsed;
+  try{parsed=JSON.parse(raw);}
+  catch{throw new Error(`AI trả về dữ liệu không parse được: ${raw.slice(0,100)}`);}
+  if(!Array.isArray(parsed))throw new Error(`Kết quả không phải mảng (type: ${typeof parsed})`);
   return parsed;
 }
 
-// ── Render Table ──
-function renderTable(n) {
-  const tbody = document.getElementById('tbody'+n);
-  const rows = state[n].rows;
+// ── Table ──
+function renderTable(n){
+  const tbody=document.getElementById('tbody'+n);
+  const rows=state[n].rows;
   tbody.innerHTML='';
-  if (!rows.length) {
-    const emptyMsg = n===1
-      ? '<div class="empty"><div class="ico">🔍</div><p>Chưa có dữ liệu</p></div>'
-      : '<div class="empty"><div class="ico">🏢</div><p>Chưa có dữ liệu</p></div>';
-    tbody.innerHTML = n===1
-      ? `<tr><td colspan="6">${emptyMsg}</td></tr>`
-      : `<tr><td colspan="5">${emptyMsg}</td></tr>`;
+  if(!rows.length){
+    const c=n===1?6:5,ico=n===1?'🔍':'🏢';
+    tbody.innerHTML=`<tr><td colspan="${c}"><div class="empty"><div class="ico">${ico}</div><p>Chưa có dữ liệu</p></div></td></tr>`;
     return;
   }
   rows.forEach((r,i)=>{
-    const tr = document.createElement('tr');
-    if (n===1) {
+    const tr=document.createElement('tr');
+    if(n===1){
       tr.innerHTML=`<td class="n">${i+1}</td>
         <td><div class="time" contenteditable="true">${esc(r.thoiGian||'')}</div></td>
         <td><div class="mst"  contenteditable="true">${esc(r.maSoDN||'')}</div></td>
         <td><div class="ct"   contenteditable="true">${esc(r.tenCT||'')}</div></td>
         <td><div class="loc"  contenteditable="true">${esc(r.tinhTP||'')}</div></td>
-        <td><button class="del-btn" data-n="${n}" data-i="${i}">🗑</button></td>`;
+        <td><button class="del-btn" data-n="1" data-i="${i}">🗑</button></td>`;
       const cells=tr.querySelectorAll('[contenteditable]');
       ['thoiGian','maSoDN','tenCT','tinhTP'].forEach((k,ci)=>
-        cells[ci].addEventListener('input',()=>{state[n].rows[i][k]=cells[ci].textContent.trim();updateStats(n)}));
-    } else {
+        cells[ci].addEventListener('input',()=>{state[1].rows[i][k]=cells[ci].textContent.trim();updateStats(1)}));
+    }else{
       tr.innerHTML=`<td class="n">${i+1}</td>
         <td><div class="ct" contenteditable="true">${esc(r.tenCT||'')}</div></td>
         <td><div class="ph" contenteditable="true">${esc(r.dienThoai||'')}</div></td>
         <td><div class="em" contenteditable="true">${esc(r.email||'')}</div></td>
-        <td><button class="del-btn" data-n="${n}" data-i="${i}">🗑</button></td>`;
+        <td><button class="del-btn" data-n="2" data-i="${i}">🗑</button></td>`;
       const cells=tr.querySelectorAll('[contenteditable]');
       ['tenCT','dienThoai','email'].forEach((k,ci)=>
-        cells[ci].addEventListener('input',()=>{state[n].rows[i][k]=cells[ci].textContent.trim();updateStats(n)}));
+        cells[ci].addEventListener('input',()=>{state[2].rows[i][k]=cells[ci].textContent.trim();updateStats(2)}));
     }
     tbody.appendChild(tr);
   });
   tbody.querySelectorAll('.del-btn').forEach(b=>b.addEventListener('click',()=>{
-    state[+b.dataset.n].rows.splice(+b.dataset.i,1);
-    renderTable(+b.dataset.n);updateStats(+b.dataset.n);
+    const tn=+b.dataset.n,ti=+b.dataset.i;
+    state[tn].rows.splice(ti,1);renderTable(tn);updateStats(tn);
   }));
 }
 
-function updateStats(n) {
-  const rows = state[n].rows;
-  if (n===1) {
+function updateStats(n){
+  const rows=state[n].rows;
+  if(n===1){
     document.getElementById('t1-total').textContent=rows.length;
-    document.getElementById('t1-hn').textContent=rows.filter(r=>(r.tinhTP||'').toLowerCase().includes('hà nội')).length;
-    document.getElementById('t1-hcm').textContent=rows.filter(r=>(r.tinhTP||'').toLowerCase().includes('hồ chí minh')||r.tinhTP?.includes('HCM')).length;
+    document.getElementById('t1-hn').textContent=rows.filter(r=>(r.tinhTP||'').includes('Hà Nội')).length;
+    document.getElementById('t1-hcm').textContent=rows.filter(r=>(r.tinhTP||'').includes('Hồ Chí Minh')).length;
     document.getElementById('exp1-count').textContent=rows.length;
-  } else {
+  }else{
     document.getElementById('t2-total').textContent=rows.length;
     document.getElementById('t2-phone').textContent=rows.filter(r=>r.dienThoai).length;
     document.getElementById('t2-email').textContent=rows.filter(r=>r.email).length;
@@ -504,65 +629,45 @@ function updateStats(n) {
   }
 }
 
-window.addRow = function(n) {
-  if (n===1) state[n].rows.push({thoiGian:'',maSoDN:'',tenCT:'',tinhTP:''});
-  else       state[n].rows.push({tenCT:'',dienThoai:'',email:''});
-  renderTable(n); updateStats(n);
+window.addRow=function(n){
+  if(n===1)state[n].rows.push({thoiGian:'',maSoDN:'',tenCT:'',tinhTP:''});
+  else state[n].rows.push({tenCT:'',dienThoai:'',email:''});
+  renderTable(n);updateStats(n);
+};
+window.clearAll=function(n){
+  if(!state[n].rows.length)return;
+  if(!confirm(`Xóa tất cả ${state[n].rows.length} bản ghi?`))return;
+  state[n].rows=[];renderTable(n);updateStats(n);
 };
 
-window.clearAll = function(n) {
-  if (!state[n].rows.length) return;
-  if (!confirm(`Xóa tất cả ${state[n].rows.length} bản ghi?`)) return;
-  state[n].rows=[]; renderTable(n); updateStats(n);
-};
-
-// ── Export ──
-window.exportXLSX = function(n) {
-  const rows=state[n].rows;
-  if (!rows.length) return alert('Chưa có dữ liệu!');
-  let data, cols, sheet;
-  if (n===1) {
-    data=[['STT','Thời gian','Mã số DN','Tên Công ty','Tỉnh/Thành phố'],
-          ...rows.map((r,i)=>[i+1,r.thoiGian,r.maSoDN,r.tenCT,r.tinhTP])];
-    cols=[{wch:5},{wch:22},{wch:16},{wch:55},{wch:28}];
-    sheet='Doanh nghiep';
-  } else {
-    data=[['STT','Tên Công ty','Điện thoại','Email'],
-          ...rows.map((r,i)=>[i+1,r.tenCT,r.dienThoai,r.email])];
-    cols=[{wch:5},{wch:55},{wch:18},{wch:35}];
-    sheet='Lien he';
-  }
-  const ws=XLSX.utils.aoa_to_sheet(data);
-  ws['!cols']=cols;
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,sheet);
+window.exportXLSX=function(n){
+  const rows=state[n].rows;if(!rows.length)return alert('Chưa có dữ liệu!');
+  const [data,cols,sheet]=n===1
+    ?[[['STT','Thời gian','Mã số DN','Tên Công ty','Tỉnh/Thành phố'],...rows.map((r,i)=>[i+1,r.thoiGian,r.maSoDN,r.tenCT,r.tinhTP])],[{wch:5},{wch:22},{wch:16},{wch:55},{wch:28}],'Danh sach DN']
+    :[[['STT','Tên Công ty','Điện thoại','Email'],...rows.map((r,i)=>[i+1,r.tenCT,r.dienThoai,r.email])],[{wch:5},{wch:55},{wch:18},{wch:35}],'Lien he'];
+  const ws=XLSX.utils.aoa_to_sheet(data);ws['!cols']=cols;
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,sheet);
   XLSX.writeFile(wb,`export-tab${n}-${new Date().toISOString().slice(0,10)}.xlsx`);
 };
-
-window.exportCSV = function(n) {
-  const rows=state[n].rows;
-  if (!rows.length) return alert('Chưa có dữ liệu!');
-  let lines;
-  if (n===1) {
-    lines=[['STT','Thời gian','Mã số DN','Tên Công ty','Tỉnh/Thành phố'].join(',')];
-    rows.forEach((r,i)=>lines.push([i+1,`"${q(r.thoiGian)}"`,r.maSoDN,`"${q(r.tenCT)}"`,`"${q(r.tinhTP)}"`].join(',')));
-  } else {
-    lines=[['STT','Tên Công ty','Điện thoại','Email'].join(',')];
-    rows.forEach((r,i)=>lines.push([i+1,`"${q(r.tenCT)}"`,r.dienThoai,r.email].join(',')));
-  }
+window.exportCSV=function(n){
+  const rows=state[n].rows;if(!rows.length)return alert('Chưa có dữ liệu!');
+  const lines=n===1
+    ?[['STT','Thời gian','Mã số DN','Tên Công ty','Tỉnh/Thành phố'].join(','),...rows.map((r,i)=>[i+1,`"${q(r.thoiGian)}"`,r.maSoDN,`"${q(r.tenCT)}"`,`"${q(r.tinhTP)}"`].join(','))]
+    :[['STT','Tên Công ty','Điện thoại','Email'].join(','),...rows.map((r,i)=>[i+1,`"${q(r.tenCT)}"`,r.dienThoai,r.email].join(','))];
   const blob=new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/csv;charset=utf-8;'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download=`export-tab${n}-${new Date().toISOString().slice(0,10)}.csv`;a.click();
 };
 
-// ── Helpers ──
-function showStatus(n,type,msg) {
+function showStatus(n,type,msg){
   const el=document.getElementById('status'+n);
   el.className='status '+type;el.style.display='flex';
-  el.innerHTML=type==='loading'?`<div class="spinner"></div><span>${msg}</span>`:`<span>${msg}</span>`;
+  el.innerHTML=type==='loading'
+    ?`<div class="spinner"></div><span style="white-space:pre-wrap">${msg}</span>`
+    :`<span style="white-space:pre-wrap">${msg}</span>`;
 }
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-function q(s){return (s||'').replace(/"/g,'""')}
+function q(s){return(s||'').replace(/"/g,'""')}
 </script>
 </body>
 </html>
