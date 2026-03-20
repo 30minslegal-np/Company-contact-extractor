@@ -1,786 +1,568 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Trích Xuất Thông Tin Công Ty → Excel</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Trích Xuất Doanh Nghiệp</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+:root{
+  --bg:#0d1117;--surface:#161b22;--surface2:#1c2128;--border:#30363d;
+  --accent:#2f81f7;--accent-glow:rgba(47,129,247,.2);
+  --green:#3fb950;--green-glow:rgba(63,185,80,.15);
+  --gold:#e3b341;--red:#f85149;--text:#e6edf3;--muted:#8b949e;
+  --radius:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(47,129,247,.08),transparent);
+  pointer-events:none;z-index:0}
 
-  :root {
-    --bg: #f5f3ee;
-    --surface: #ffffff;
-    --surface2: #f0ede6;
-    --border: #ddd9cf;
-    --accent: #1a5c3a;
-    --accent-light: #e8f2ec;
-    --accent2: #2e7d52;
-    --gold: #b8860b;
-    --gold-light: #fdf8e8;
-    --red: #c0392b;
-    --red-light: #fdecea;
-    --text: #1a1a1a;
-    --muted: #7a7060;
-    --radius: 10px;
-    --shadow: 0 2px 12px rgba(0,0,0,.08);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,.12);
-  }
+/* ── Layout ── */
+.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:28px 20px 64px}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── Header ── */
+.header{display:flex;align-items:center;gap:14px;margin-bottom:28px;
+  padding-bottom:20px;border-bottom:1px solid var(--border)}
+.logo{width:44px;height:44px;border-radius:11px;
+  background:linear-gradient(135deg,#1f6feb,var(--accent));
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+  box-shadow:0 0 20px var(--accent-glow);flex-shrink:0}
+.header-text h1{font-size:19px;font-weight:800;letter-spacing:-.3px}
+.header-text p{font-size:12px;color:var(--muted);margin-top:2px}
 
-  body {
-    font-family: 'Lexend', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-  }
+/* ── Tabs ── */
+.tabs{display:flex;gap:4px;margin-bottom:22px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:4px;width:fit-content}
+.tab{padding:8px 22px;border-radius:7px;border:none;cursor:pointer;
+  font-family:'Be Vietnam Pro',sans-serif;font-size:13px;font-weight:600;
+  transition:all .2s;color:var(--muted);background:transparent}
+.tab.active{background:var(--accent);color:#fff;box-shadow:0 2px 10px var(--accent-glow)}
+.tab:not(.active):hover{color:var(--text);background:var(--surface2)}
 
-  /* Subtle paper texture */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23f5f3ee'/%3E%3Ccircle cx='1' cy='1' r='.4' fill='%23e8e4da' opacity='.5'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-  }
+.tab-panel{display:none}
+.tab-panel.active{display:block}
 
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 1120px;
-    margin: 0 auto;
-    padding: 32px 24px 72px;
-  }
+/* ── Two-col grid ── */
+.grid{display:grid;grid-template-columns:380px 1fr;gap:20px;align-items:start}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
 
-  /* ── Top bar ── */
-  .topbar {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    margin-bottom: 36px;
-    padding-bottom: 24px;
-    border-bottom: 2px solid var(--border);
-  }
-  .logo {
-    width: 52px; height: 52px;
-    background: var(--accent);
-    border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px;
-    flex-shrink: 0;
-    box-shadow: 0 4px 16px rgba(26,92,58,.25);
-  }
-  .topbar-text h1 {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--accent);
-    letter-spacing: -.3px;
-  }
-  .topbar-text p {
-    font-size: 12.5px;
-    color: var(--muted);
-    font-weight: 300;
-    margin-top: 2px;
-  }
-  .version {
-    margin-left: auto;
-    background: var(--accent);
-    color: #fff;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    padding: 4px 12px;
-    border-radius: 20px;
-    letter-spacing: 1px;
-  }
+/* ── Card ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.card-head{padding:11px 16px;background:var(--surface2);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:10px}
+.card-title{font-size:11.5px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.7px;display:flex;align-items:center;gap:6px}
+.card-body{padding:16px}
 
-  /* ── Two-col layout ── */
-  .layout {
-    display: grid;
-    grid-template-columns: 420px 1fr;
-    gap: 24px;
-    align-items: start;
-  }
-  @media (max-width: 900px) {
-    .layout { grid-template-columns: 1fr; }
-  }
+/* ── Upload zone ── */
+.drop{border:2px dashed var(--border);border-radius:10px;
+  background:var(--surface2);padding:36px 18px;text-align:center;
+  cursor:pointer;transition:all .2s}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-glow)}
+.drop .ico{font-size:34px;margin-bottom:10px}
+.drop h3{font-size:14px;font-weight:600;margin-bottom:4px}
+.drop p{font-size:12px;color:var(--muted);line-height:1.5}
+.drop input{display:none}
 
-  /* ── Card ── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-    overflow: hidden;
-  }
-  .card-header {
-    padding: 14px 18px;
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-  .card-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: .7px;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-  }
-  .card-body { padding: 18px; }
+/* queue */
+.queue{display:flex;flex-direction:column;gap:5px;margin-top:11px}
+.qi{display:flex;align-items:center;gap:8px;padding:6px 10px;
+  background:var(--surface2);border:1px solid var(--border);border-radius:7px}
+.qi .qn{flex:1;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qbadge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700}
+.qbadge.p{background:#2d2f0e;color:#e3b341}
+.qbadge.d{background:#0d2118;color:var(--green)}
+.qbadge.e{background:#2d1117;color:var(--red)}
 
-  /* ── Upload zone ── */
-  .upload-zone {
-    border: 2px dashed var(--border);
-    border-radius: 12px;
-    background: var(--surface2);
-    padding: 40px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all .22s;
-  }
-  .upload-zone:hover, .upload-zone.dragover {
-    border-color: var(--accent);
-    background: var(--accent-light);
-  }
-  .upload-zone .icon { font-size: 36px; margin-bottom: 10px; }
-  .upload-zone h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
-  .upload-zone p { font-size: 12px; color: var(--muted); line-height: 1.5; }
-  .upload-zone input { display: none; }
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;
+  border-radius:var(--radius);font-family:'Be Vietnam Pro',sans-serif;
+  font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .18s;white-space:nowrap}
+.btn-blue{background:var(--accent);color:#fff;width:100%;justify-content:center;
+  margin-top:12px;padding:11px;box-shadow:0 3px 12px var(--accent-glow)}
+.btn-blue:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.btn-blue:disabled{opacity:.45;cursor:not-allowed;transform:none;filter:none}
+.btn-green{background:var(--green);color:#0d1117;font-weight:700;
+  box-shadow:0 3px 12px var(--green-glow)}
+.btn-green:hover{transform:translateY(-1px);filter:brightness(1.1)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
 
-  .preview-img-wrap {
-    border-radius: 10px;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    background: var(--surface2);
-    margin-top: 14px;
-  }
-  .preview-img {
-    width: 100%;
-    max-height: 300px;
-    object-fit: contain;
-    display: block;
-  }
-  .file-info {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
-    background: var(--surface2);
-    border-top: 1px solid var(--border);
-  }
-  .file-name {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+/* ── Status ── */
+.status{margin-top:13px;padding:11px 14px;border-radius:var(--radius);
+  font-size:12.5px;display:flex;align-items:flex-start;gap:9px;line-height:1.5}
+.status.loading{background:rgba(47,129,247,.1);border:1px solid rgba(47,129,247,.25);color:#79b8ff}
+.status.error{background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.25);color:#ffa198}
+.status.success{background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.25);color:var(--green)}
+.spinner{width:14px;height:14px;border:2px solid rgba(121,184,255,.3);
+  border-top-color:#79b8ff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;margin-top:1px}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-  /* ── Buttons ── */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 9px 18px;
-    border-radius: var(--radius);
-    font-family: 'Lexend', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: all .18s;
-    white-space: nowrap;
-  }
-  .btn-primary {
-    background: var(--accent);
-    color: #fff;
-    width: 100%;
-    justify-content: center;
-    margin-top: 14px;
-    padding: 12px;
-    font-size: 14px;
-    box-shadow: 0 4px 14px rgba(26,92,58,.3);
-  }
-  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
-  .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-  .btn-success {
-    background: linear-gradient(135deg, #1a7a4a, #2ecc71);
-    color: #fff;
-    box-shadow: 0 4px 14px rgba(46,204,113,.25);
-  }
-  .btn-success:hover { transform: translateY(-1px); }
-  .btn-ghost {
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
-  }
-  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-  .btn-sm { padding: 6px 12px; font-size: 12px; }
-  .btn-danger { background: var(--red-light); color: var(--red); border: 1px solid #f5c6c2; }
-  .btn-danger:hover { background: #fbd7d4; }
+/* ── Stats ── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;text-align:center}
+.stat-n{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;
+  color:var(--accent);line-height:1;margin-bottom:3px}
+.stat-l{font-size:11px;color:var(--muted)}
 
-  /* ── Status ── */
-  .status {
-    margin-top: 14px;
-    padding: 11px 14px;
-    border-radius: var(--radius);
-    font-size: 12.5px;
-    display: flex;
-    align-items: flex-start;
-    gap: 9px;
-    line-height: 1.5;
-  }
-  .status.loading { background: var(--accent-light); border: 1px solid #b8ddc8; color: var(--accent2); }
-  .status.error { background: var(--red-light); border: 1px solid #f5c6c2; color: var(--red); }
-  .status.success { background: #eafaf1; border: 1px solid #a9dfbf; color: #1e8449; }
-  .spinner {
-    width: 15px; height: 15px;
-    border: 2px solid rgba(46,125,82,.3);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin .7s linear infinite;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* ── Right column ── */
+.right{display:flex;flex-direction:column;gap:16px}
 
-  /* ── Right panel ── */
-  .right-panel { display: flex; flex-direction: column; gap: 20px; }
+/* ── Table ── */
+.tbl-wrap{overflow:auto;max-height:500px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+thead{position:sticky;top:0;background:var(--surface2);z-index:2}
+thead th{padding:10px 13px;text-align:left;font-size:10px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+  border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr{border-bottom:1px solid rgba(48,54,61,.6);transition:background .12s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--surface2)}
+tbody td{padding:9px 13px;vertical-align:top}
+.n{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);text-align:center;width:30px}
+.ct{font-weight:600;color:var(--text)}
+.mst{font-family:'Space Mono',monospace;font-size:11.5px;color:var(--accent)}
+.time{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)}
+.loc{color:var(--gold);font-size:12px}
+.ph{font-family:'Space Mono',monospace;font-size:12px;color:var(--green)}
+.em{font-size:12px;color:var(--gold)}
 
-  /* ── Stats row ── */
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
-    text-align: center;
-    box-shadow: var(--shadow);
-  }
-  .stat-val {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--accent);
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-  .stat-label { font-size: 11px; color: var(--muted); font-weight: 400; }
+[contenteditable]{outline:none;border:1px solid transparent;border-radius:4px;
+  padding:2px 4px;margin:-2px -4px;background:transparent;color:inherit;
+  font:inherit;width:100%;min-width:50px;display:inline-block;transition:all .13s}
+[contenteditable]:focus{border-color:var(--accent);background:rgba(47,129,247,.08)}
 
-  /* ── Table ── */
-  .table-card { flex: 1; }
-  .table-wrap { overflow: auto; max-height: 520px; }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-  thead {
-    position: sticky;
-    top: 0;
-    background: var(--surface2);
-    z-index: 2;
-  }
-  thead th {
-    padding: 11px 14px;
-    text-align: left;
-    font-size: 10.5px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .8px;
-    color: var(--muted);
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-  tbody tr { border-bottom: 1px solid rgba(221,217,207,.5); transition: background .12s; }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: var(--accent-light); }
-  tbody td { padding: 10px 14px; vertical-align: top; }
-  .td-num {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    text-align: center;
-    width: 32px;
-  }
-  .td-name { font-weight: 600; font-size: 12.5px; color: var(--text); }
-  .td-phone {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--accent);
-  }
-  .td-email { font-size: 12px; color: var(--gold); }
+.del-btn{background:none;border:none;color:transparent;cursor:pointer;
+  font-size:13px;padding:2px 6px;border-radius:4px;transition:all .13s}
+tbody tr:hover .del-btn{color:var(--red)}
+.del-btn:hover{background:rgba(248,81,73,.12)}
 
-  /* editable */
-  [contenteditable] {
-    outline: none;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    padding: 2px 5px;
-    margin: -2px -5px;
-    background: transparent;
-    min-width: 60px;
-    transition: all .15s;
-    cursor: text;
-    display: inline-block;
-    width: 100%;
-  }
-  [contenteditable]:focus {
-    border-color: var(--accent);
-    background: var(--accent-light);
-  }
+.empty{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty .ico{font-size:34px;margin-bottom:10px;opacity:.4}
+.empty p{font-size:12.5px;line-height:1.6}
 
-  /* del btn */
-  .del-btn {
-    background: none; border: none;
-    color: transparent; cursor: pointer;
-    font-size: 14px; padding: 3px 7px;
-    border-radius: 5px; transition: all .13s;
-  }
-  tbody tr:hover .del-btn { color: var(--red); }
-  .del-btn:hover { background: var(--red-light); }
-
-  /* empty */
-  .empty-state {
-    text-align: center;
-    padding: 56px 20px;
-    color: var(--muted);
-  }
-  .empty-state .icon { font-size: 40px; margin-bottom: 12px; opacity: .5; }
-  .empty-state p { font-size: 13px; line-height: 1.6; }
-
-  /* ── Export footer ── */
-  .export-bar {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 18px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    box-shadow: var(--shadow);
-    flex-wrap: wrap;
-  }
-  .export-info { font-size: 13px; color: var(--muted); }
-  .export-info strong { color: var(--text); font-weight: 700; }
-  .export-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-
-  /* multi-upload queue */
-  .queue-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-top: 10px;
-  }
-  .queue-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 10px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    font-size: 12px;
-  }
-  .queue-item .q-name {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-  }
-  .q-badge {
-    font-size: 10px;
-    padding: 2px 7px;
-    border-radius: 10px;
-    font-weight: 600;
-  }
-  .q-badge.pending { background: #fff3cd; color: #856404; }
-  .q-badge.done { background: #d1f2e0; color: #1e7e34; }
-  .q-badge.err { background: var(--red-light); color: var(--red); }
+/* ── Export bar ── */
+.export-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.exp-info{font-size:12.5px;color:var(--muted)}
+.exp-info strong{color:var(--text);font-weight:700}
 </style>
 </head>
 <body>
-<div class="container">
+<div class="wrap">
 
-  <!-- Topbar -->
-  <div class="topbar">
-    <div class="logo">📋</div>
-    <div class="topbar-text">
-      <h1>Trích Xuất Thông Tin Công Ty</h1>
-      <p>Tải nhiều ảnh / PDF → AI nhận diện → Xuất file Excel đầy đủ</p>
-    </div>
-    <div class="version">v2.0</div>
-  </div>
-
-  <div class="layout">
-
-    <!-- LEFT: Upload -->
-    <div>
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">🖼 Nguồn ảnh</span>
-        </div>
-        <div class="card-body">
-          <div class="upload-zone" id="dropzone">
-            <div class="icon">📂</div>
-            <h3>Kéo thả hoặc click để chọn ảnh</h3>
-            <p>Hỗ trợ JPG, PNG, WEBP<br/>Có thể chọn nhiều ảnh cùng lúc</p>
-            <input type="file" id="fileInput" accept="image/*" multiple />
-          </div>
-
-          <!-- Queue -->
-          <div class="queue-list" id="queueList"></div>
-
-          <button class="btn btn-primary" id="extractBtn" disabled>⚡ Bắt đầu phân tích tất cả</button>
-        </div>
-      </div>
-
-      <!-- Status -->
-      <div class="status loading" id="statusBox" style="display:none">
-        <div class="spinner"></div>
-        <span id="statusText"></span>
-      </div>
-    </div>
-
-    <!-- RIGHT -->
-    <div class="right-panel">
-
-      <!-- Stats -->
-      <div class="stats">
-        <div class="stat-card">
-          <div class="stat-val" id="statTotal">0</div>
-          <div class="stat-label">Tổng bản ghi</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-val" id="statPhone">0</div>
-          <div class="stat-label">Có SĐT</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-val" id="statEmail">0</div>
-          <div class="stat-label">Có Email</div>
-        </div>
-      </div>
-
-      <!-- Table -->
-      <div class="card table-card">
-        <div class="card-header">
-          <span class="card-title">📊 Kết quả trích xuất</span>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-ghost btn-sm" id="addRowBtn">＋ Thêm</button>
-            <button class="btn btn-ghost btn-sm" id="clearAllBtn">🗑 Xóa tất cả</button>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th style="text-align:center">#</th>
-                <th>Tên Công ty</th>
-                <th>Điện thoại</th>
-                <th>Email</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="tableBody">
-              <tr>
-                <td colspan="5">
-                  <div class="empty-state">
-                    <div class="icon">🏢</div>
-                    <p>Chưa có dữ liệu<br/>Tải ảnh lên và nhấn <strong>Bắt đầu phân tích</strong></p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Export bar -->
-      <div class="export-bar">
-        <div class="export-info">
-          Sẵn sàng xuất: <strong id="exportCount">0</strong> bản ghi
-        </div>
-        <div class="export-actions">
-          <button class="btn btn-ghost" id="exportCSV">📄 Xuất CSV</button>
-          <button class="btn btn-success" id="exportXLSX">⬇ Xuất Excel (.xlsx)</button>
-        </div>
-      </div>
-
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">🏢</div>
+    <div class="header-text">
+      <h1>Trích Xuất Doanh Nghiệp</h1>
+      <p>Tải ảnh → AI phân tích → Xuất Excel · Powered by Claude AI</p>
     </div>
   </div>
-</div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab(1)">📋 Tab 1 · Danh sách DN (Thời gian · Mã số · Tên · Tỉnh/TP)</button>
+    <button class="tab"        onclick="switchTab(2)">📇 Tab 2 · Thông tin liên hệ (Tên CT · SĐT · Email)</button>
+  </div>
+
+  <!-- ══════════════════════════════════ TAB 1 ══════════════════════════════════ -->
+  <div class="tab-panel active" id="tab1">
+    <div class="grid">
+      <!-- LEFT -->
+      <div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">🖼 Nguồn ảnh</span></div>
+          <div class="card-body">
+            <div class="drop" id="drop1">
+              <div class="ico">📂</div>
+              <h3>Kéo thả hoặc click để chọn ảnh</h3>
+              <p>JPG · PNG · WEBP<br/>Chọn nhiều ảnh cùng lúc</p>
+              <input type="file" id="fi1" accept="image/*" multiple/>
+            </div>
+            <div class="queue" id="queue1"></div>
+            <button class="btn btn-blue" id="extractBtn1" disabled>⚡ Bắt đầu phân tích</button>
+          </div>
+        </div>
+        <div class="status" id="status1" style="display:none"></div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="right">
+        <div class="stats">
+          <div class="stat"><div class="stat-n" id="t1-total">0</div><div class="stat-l">Bản ghi</div></div>
+          <div class="stat"><div class="stat-n" id="t1-hn">0</div><div class="stat-l">Hà Nội</div></div>
+          <div class="stat"><div class="stat-n" id="t1-hcm">0</div><div class="stat-l">HCM</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">📊 Kết quả</span>
+            <div class="btn-row">
+              <button class="btn btn-ghost btn-sm" onclick="addRow(1)">＋ Thêm</button>
+              <button class="btn btn-ghost btn-sm" onclick="clearAll(1)">🗑 Xóa</button>
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th class="n">#</th>
+                <th>Thời gian</th><th>Mã số DN</th><th>Tên Công ty</th><th>Tỉnh / TP</th><th></th>
+              </tr></thead>
+              <tbody id="tbody1">
+                <tr><td colspan="6"><div class="empty"><div class="ico">🔍</div><p>Chưa có dữ liệu<br/>Tải ảnh và nhấn Phân tích</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="export-bar">
+          <div class="exp-info">Xuất: <strong id="exp1-count">0</strong> bản ghi</div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" onclick="exportCSV(1)">📄 CSV</button>
+            <button class="btn btn-green" onclick="exportXLSX(1)">⬇ Excel (.xlsx)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ TAB 2 ══════════════════════════════════ -->
+  <div class="tab-panel" id="tab2">
+    <div class="grid">
+      <!-- LEFT -->
+      <div>
+        <div class="card">
+          <div class="card-head"><span class="card-title">🖼 Nguồn ảnh</span></div>
+          <div class="card-body">
+            <div class="drop" id="drop2">
+              <div class="ico">📂</div>
+              <h3>Kéo thả hoặc click để chọn ảnh</h3>
+              <p>JPG · PNG · WEBP<br/>Chọn nhiều ảnh cùng lúc</p>
+              <input type="file" id="fi2" accept="image/*" multiple/>
+            </div>
+            <div class="queue" id="queue2"></div>
+            <button class="btn btn-blue" id="extractBtn2" disabled>⚡ Bắt đầu phân tích</button>
+          </div>
+        </div>
+        <div class="status" id="status2" style="display:none"></div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="right">
+        <div class="stats">
+          <div class="stat"><div class="stat-n" id="t2-total">0</div><div class="stat-l">Bản ghi</div></div>
+          <div class="stat"><div class="stat-n" id="t2-phone">0</div><div class="stat-l">Có SĐT</div></div>
+          <div class="stat"><div class="stat-n" id="t2-email">0</div><div class="stat-l">Có Email</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">📊 Kết quả</span>
+            <div class="btn-row">
+              <button class="btn btn-ghost btn-sm" onclick="addRow(2)">＋ Thêm</button>
+              <button class="btn btn-ghost btn-sm" onclick="clearAll(2)">🗑 Xóa</button>
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th class="n">#</th>
+                <th>Tên Công ty</th><th>Điện thoại</th><th>Email</th><th></th>
+              </tr></thead>
+              <tbody id="tbody2">
+                <tr><td colspan="5"><div class="empty"><div class="ico">🏢</div><p>Chưa có dữ liệu<br/>Tải ảnh và nhấn Phân tích</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="export-bar">
+          <div class="exp-info">Xuất: <strong id="exp2-count">0</strong> bản ghi</div>
+          <div class="btn-row">
+            <button class="btn btn-ghost" onclick="exportCSV(2)">📄 CSV</button>
+            <button class="btn btn-green" onclick="exportXLSX(2)">⬇ Excel (.xlsx)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
 
 <script>
-  let rows = [];
-  let fileQueue = []; // { file, status: 'pending'|'done'|'error' }
+// ╔══════════════════════════════════════════════════════╗
+// ║          ⚙️  CẤU HÌNH — ĐIỀN API KEY VÀO ĐÂY        ║
+// ╚══════════════════════════════════════════════════════╝
+const ANTHROPIC_API_KEY = "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";
+//  👆 Thay bằng key của bạn tại: console.anthropic.com/account/keys
+// ════════════════════════════════════════════════════════
 
-  const dropzone = document.getElementById('dropzone');
-  const fileInput = document.getElementById('fileInput');
-  const queueList = document.getElementById('queueList');
-  const extractBtn = document.getElementById('extractBtn');
-  const statusBox = document.getElementById('statusBox');
-  const statusText = document.getElementById('statusText');
-  const tableBody = document.getElementById('tableBody');
-  const addRowBtn = document.getElementById('addRowBtn');
-  const clearAllBtn = document.getElementById('clearAllBtn');
-  const exportXLSX = document.getElementById('exportXLSX');
-  const exportCSV = document.getElementById('exportCSV');
+const PROMPT1 = `Phân tích ảnh và trích xuất thông tin các doanh nghiệp. Trả về JSON thuần (không markdown, không backtick), mảng objects:
+[{"thoiGian":"20/03/2026 1:11:48 CH","maSoDN":"0111421236","tenCT":"CÔNG TY TNHH ...","tinhTP":"Thành phố Hà Nội"}]
+Chỉ trả JSON.`;
 
-  // ── Drag & Drop ──
-  dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
-  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-  dropzone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropzone.classList.remove('dragover');
-    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-    addToQueue(files);
+const PROMPT2 = `Phân tích ảnh (công bố thành lập DN hoặc danh sách DN). Trích xuất: tên công ty, số điện thoại (không lấy Fax), email. Trả về JSON thuần (không markdown):
+[{"tenCT":"Tên đầy đủ","dienThoai":"0348224001","email":"abc@gmail.com"}]
+Nếu không có SĐT/email để chuỗi rỗng. Chỉ trả JSON.`;
+
+// State
+const state = {
+  1: { rows: [], queue: [] },
+  2: { rows: [], queue: [] }
+};
+
+// Tab switch
+function switchTab(n) {
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active', i===n-1));
+  document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active', i===n-1));
+}
+
+// ── Setup drop zones ──
+[1,2].forEach(n => {
+  const drop = document.getElementById('drop'+n);
+  const fi   = document.getElementById('fi'+n);
+  drop.addEventListener('dragover', e=>{e.preventDefault();drop.classList.add('over')});
+  drop.addEventListener('dragleave', ()=>drop.classList.remove('over'));
+  drop.addEventListener('drop', e=>{
+    e.preventDefault();drop.classList.remove('over');
+    addFiles(n, Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/')));
   });
-  dropzone.addEventListener('click', () => fileInput.click());
-  fileInput.addEventListener('change', e => {
-    const files = Array.from(e.target.files);
-    addToQueue(files);
-    fileInput.value = '';
+  drop.addEventListener('click', ()=>fi.click());
+  fi.addEventListener('change', e=>{addFiles(n, Array.from(e.target.files));fi.value='';});
+});
+
+function addFiles(n, files) {
+  files.forEach(f=>state[n].queue.push({file:f,status:'pending'}));
+  renderQueue(n);
+  document.getElementById('extractBtn'+n).disabled = state[n].queue.length===0;
+}
+
+function renderQueue(n) {
+  const el = document.getElementById('queue'+n);
+  el.innerHTML = '';
+  state[n].queue.forEach((item,i)=>{
+    const d = document.createElement('div');
+    d.className='qi';
+    const icon = item.status==='done'?'✅':item.status==='error'?'❌':'🖼';
+    const label = item.status==='done'?'Xong':item.status==='error'?'Lỗi':'Chờ';
+    const cls = item.status==='done'?'d':item.status==='error'?'e':'p';
+    d.innerHTML=`<span style="font-size:14px">${icon}</span>
+      <span class="qn">${item.file.name}</span>
+      <span class="qbadge ${cls}">${label}</span>
+      ${item.status==='pending'?`<button onclick="removeFile(${n},${i})" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px">✕</button>`:''}`;
+    el.appendChild(d);
   });
+}
 
-  function addToQueue(files) {
-    files.forEach(f => fileQueue.push({ file: f, status: 'pending' }));
-    renderQueue();
-    extractBtn.disabled = fileQueue.length === 0;
+window.removeFile = function(n,i){ state[n].queue.splice(i,1); renderQueue(n); document.getElementById('extractBtn'+n).disabled=state[n].queue.length===0; };
+
+// ── Extract ──
+[1,2].forEach(n=>{
+  document.getElementById('extractBtn'+n).addEventListener('click', ()=>runExtract(n));
+});
+
+async function runExtract(n) {
+  const key = ANTHROPIC_API_KEY;
+  if (!key || key.includes('REPLACE-ME')) {
+    showStatus(n,'error','❌ Chưa cấu hình API Key! Mở file HTML, tìm dòng ANTHROPIC_API_KEY và điền key vào.');
+    return;
   }
+  const pending = state[n].queue.filter(f=>f.status==='pending');
+  if (!pending.length) return;
+  document.getElementById('extractBtn'+n).disabled = true;
 
-  function renderQueue() {
-    queueList.innerHTML = '';
-    fileQueue.forEach((item, i) => {
-      const el = document.createElement('div');
-      el.className = 'queue-item';
-      el.innerHTML = `
-        <span style="font-size:16px">${item.status === 'done' ? '✅' : item.status === 'error' ? '❌' : '🖼'}</span>
-        <span class="q-name">${item.file.name}</span>
-        <span class="q-badge ${item.status === 'done' ? 'done' : item.status === 'error' ? 'err' : 'pending'}">
-          ${item.status === 'done' ? 'Xong' : item.status === 'error' ? 'Lỗi' : 'Chờ'}
-        </span>
-        ${item.status === 'pending' ? `<button onclick="removeFromQueue(${i})" style="background:none;border:none;cursor:pointer;color:#999;font-size:14px;">✕</button>` : ''}
-      `;
-      queueList.appendChild(el);
-    });
-  }
-
-  function removeFromQueue(i) {
-    fileQueue.splice(i, 1);
-    renderQueue();
-    extractBtn.disabled = fileQueue.length === 0;
-  }
-
-  // ── Extract all ──
-  extractBtn.addEventListener('click', async () => {
-    const pending = fileQueue.filter(f => f.status === 'pending');
-    if (!pending.length) return;
-    extractBtn.disabled = true;
-
-    for (let i = 0; i < fileQueue.length; i++) {
-      const item = fileQueue[i];
-      if (item.status !== 'pending') continue;
-
-      showStatus('loading', `🔍 Đang phân tích: ${item.file.name} (${i+1}/${fileQueue.length})...`);
-
-      try {
-        const base64 = await fileToBase64(item.file);
-        const mediaType = item.file.type || 'image/png';
-        const extracted = await callClaude(base64, mediaType);
-        rows.push(...extracted);
-        item.status = 'done';
-      } catch (err) {
-        item.status = 'error';
-        console.error(err);
-      }
-
-      renderQueue();
+  for (let i=0; i<state[n].queue.length; i++) {
+    const item = state[n].queue[i];
+    if (item.status !== 'pending') continue;
+    showStatus(n,'loading',`🔍 Phân tích: ${item.file.name} (${i+1}/${state[n].queue.length})...`);
+    try {
+      const b64 = await toBase64(item.file);
+      const prompt = n===1 ? PROMPT1 : PROMPT2;
+      const extracted = await callClaude(key, b64, item.file.type||'image/png', prompt);
+      state[n].rows.push(...extracted);
+      item.status='done';
+    } catch(err) {
+      item.status='error';
+      console.error(err);
     }
+    renderQueue(n);
+  }
 
-    renderTable();
-    updateStats();
+  renderTable(n); updateStats(n);
+  const done = state[n].queue.filter(f=>f.status==='done').length;
+  const err  = state[n].queue.filter(f=>f.status==='error').length;
+  showStatus(n, err===0?'success':'error',
+    err===0
+      ? `✅ Hoàn tất! Trích xuất ${state[n].rows.length} bản ghi từ ${done} ảnh.`
+      : `⚠️ ${done} ảnh thành công, ${err} ảnh lỗi. Tổng: ${state[n].rows.length} bản ghi.`);
+  document.getElementById('extractBtn'+n).disabled = false;
+}
 
-    const doneCount = fileQueue.filter(f => f.status === 'done').length;
-    const errCount = fileQueue.filter(f => f.status === 'error').length;
-    if (errCount === 0) {
-      showStatus('success', `✅ Hoàn tất! Trích xuất được ${rows.length} bản ghi từ ${doneCount} ảnh.`);
+async function toBase64(file) {
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=ev=>res(ev.target.result.split(',')[1]);
+    r.onerror=()=>rej(new Error('Không đọc được file'));
+    r.readAsDataURL(file);
+  });
+}
+
+async function callClaude(apiKey, base64, mediaType, prompt) {
+  const res = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body: JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:4000,
+      messages:[{
+        role:'user',
+        content:[
+          {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
+          {type:'text',text:prompt}
+        ]
+      }]
+    })
+  });
+  if (!res.ok) { const e=await res.json(); throw new Error(e.error?.message||`HTTP ${res.status}`); }
+  const data = await res.json();
+  const raw = data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+  const parsed = JSON.parse(raw);
+  if (!Array.isArray(parsed)) throw new Error('AI không trả về mảng dữ liệu');
+  return parsed;
+}
+
+// ── Render Table ──
+function renderTable(n) {
+  const tbody = document.getElementById('tbody'+n);
+  const rows = state[n].rows;
+  tbody.innerHTML='';
+  if (!rows.length) {
+    const emptyMsg = n===1
+      ? '<div class="empty"><div class="ico">🔍</div><p>Chưa có dữ liệu</p></div>'
+      : '<div class="empty"><div class="ico">🏢</div><p>Chưa có dữ liệu</p></div>';
+    tbody.innerHTML = n===1
+      ? `<tr><td colspan="6">${emptyMsg}</td></tr>`
+      : `<tr><td colspan="5">${emptyMsg}</td></tr>`;
+    return;
+  }
+  rows.forEach((r,i)=>{
+    const tr = document.createElement('tr');
+    if (n===1) {
+      tr.innerHTML=`<td class="n">${i+1}</td>
+        <td><div class="time" contenteditable="true">${esc(r.thoiGian||'')}</div></td>
+        <td><div class="mst"  contenteditable="true">${esc(r.maSoDN||'')}</div></td>
+        <td><div class="ct"   contenteditable="true">${esc(r.tenCT||'')}</div></td>
+        <td><div class="loc"  contenteditable="true">${esc(r.tinhTP||'')}</div></td>
+        <td><button class="del-btn" data-n="${n}" data-i="${i}">🗑</button></td>`;
+      const cells=tr.querySelectorAll('[contenteditable]');
+      ['thoiGian','maSoDN','tenCT','tinhTP'].forEach((k,ci)=>
+        cells[ci].addEventListener('input',()=>{state[n].rows[i][k]=cells[ci].textContent.trim();updateStats(n)}));
     } else {
-      showStatus('error', `⚠️ Xong ${doneCount} ảnh, ${errCount} ảnh bị lỗi. Tổng: ${rows.length} bản ghi.`);
+      tr.innerHTML=`<td class="n">${i+1}</td>
+        <td><div class="ct" contenteditable="true">${esc(r.tenCT||'')}</div></td>
+        <td><div class="ph" contenteditable="true">${esc(r.dienThoai||'')}</div></td>
+        <td><div class="em" contenteditable="true">${esc(r.email||'')}</div></td>
+        <td><button class="del-btn" data-n="${n}" data-i="${i}">🗑</button></td>`;
+      const cells=tr.querySelectorAll('[contenteditable]');
+      ['tenCT','dienThoai','email'].forEach((k,ci)=>
+        cells[ci].addEventListener('input',()=>{state[n].rows[i][k]=cells[ci].textContent.trim();updateStats(n)}));
     }
-
-    extractBtn.disabled = false;
+    tbody.appendChild(tr);
   });
+  tbody.querySelectorAll('.del-btn').forEach(b=>b.addEventListener('click',()=>{
+    state[+b.dataset.n].rows.splice(+b.dataset.i,1);
+    renderTable(+b.dataset.n);updateStats(+b.dataset.n);
+  }));
+}
 
-  async function fileToBase64(file) {
-    return new Promise((res, rej) => {
-      const r = new FileReader();
-      r.onload = ev => res(ev.target.result.split(',')[1]);
-      r.onerror = () => rej(new Error('Không thể đọc file'));
-      r.readAsDataURL(file);
-    });
+function updateStats(n) {
+  const rows = state[n].rows;
+  if (n===1) {
+    document.getElementById('t1-total').textContent=rows.length;
+    document.getElementById('t1-hn').textContent=rows.filter(r=>(r.tinhTP||'').toLowerCase().includes('hà nội')).length;
+    document.getElementById('t1-hcm').textContent=rows.filter(r=>(r.tinhTP||'').toLowerCase().includes('hồ chí minh')||r.tinhTP?.includes('HCM')).length;
+    document.getElementById('exp1-count').textContent=rows.length;
+  } else {
+    document.getElementById('t2-total').textContent=rows.length;
+    document.getElementById('t2-phone').textContent=rows.filter(r=>r.dienThoai).length;
+    document.getElementById('t2-email').textContent=rows.filter(r=>r.email).length;
+    document.getElementById('exp2-count').textContent=rows.length;
   }
+}
 
-  async function callClaude(base64, mediaType) {
-    const prompt = `Hãy phân tích hình ảnh này (đây là công bố thành lập doanh nghiệp hoặc bảng danh sách doanh nghiệp).
-Trích xuất thông tin sau cho MỖI công ty có trong ảnh:
-- Tên công ty (đầy đủ, bằng tiếng Việt)
-- Số điện thoại (nếu có, chỉ lấy số, không lấy Fax)
-- Email (nếu có)
+window.addRow = function(n) {
+  if (n===1) state[n].rows.push({thoiGian:'',maSoDN:'',tenCT:'',tinhTP:''});
+  else       state[n].rows.push({tenCT:'',dienThoai:'',email:''});
+  renderTable(n); updateStats(n);
+};
 
-Trả về JSON thuần (không markdown, không backtick, không giải thích), là mảng các object:
-[
-  {
-    "tenCT": "Tên công ty đầy đủ",
-    "dienThoai": "0348224001",
-    "email": "ctc.cuongthinh@gmail.com"
+window.clearAll = function(n) {
+  if (!state[n].rows.length) return;
+  if (!confirm(`Xóa tất cả ${state[n].rows.length} bản ghi?`)) return;
+  state[n].rows=[]; renderTable(n); updateStats(n);
+};
+
+// ── Export ──
+window.exportXLSX = function(n) {
+  const rows=state[n].rows;
+  if (!rows.length) return alert('Chưa có dữ liệu!');
+  let data, cols, sheet;
+  if (n===1) {
+    data=[['STT','Thời gian','Mã số DN','Tên Công ty','Tỉnh/Thành phố'],
+          ...rows.map((r,i)=>[i+1,r.thoiGian,r.maSoDN,r.tenCT,r.tinhTP])];
+    cols=[{wch:5},{wch:22},{wch:16},{wch:55},{wch:28}];
+    sheet='Doanh nghiep';
+  } else {
+    data=[['STT','Tên Công ty','Điện thoại','Email'],
+          ...rows.map((r,i)=>[i+1,r.tenCT,r.dienThoai,r.email])];
+    cols=[{wch:5},{wch:55},{wch:18},{wch:35}];
+    sheet='Lien he';
   }
-]
-Nếu không có SĐT hoặc email, để chuỗi rỗng "".
-Chỉ trả về JSON thuần.`;
+  const ws=XLSX.utils.aoa_to_sheet(data);
+  ws['!cols']=cols;
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,sheet);
+  XLSX.writeFile(wb,`export-tab${n}-${new Date().toISOString().slice(0,10)}.xlsx`);
+};
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-            { type: 'text', text: prompt }
-          ]
-        }]
-      })
-    });
-
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error?.message || `HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-    const raw = data.content.map(b => b.text || '').join('').replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) throw new Error('AI không trả về mảng dữ liệu');
-    return parsed;
+window.exportCSV = function(n) {
+  const rows=state[n].rows;
+  if (!rows.length) return alert('Chưa có dữ liệu!');
+  let lines;
+  if (n===1) {
+    lines=[['STT','Thời gian','Mã số DN','Tên Công ty','Tỉnh/Thành phố'].join(',')];
+    rows.forEach((r,i)=>lines.push([i+1,`"${q(r.thoiGian)}"`,r.maSoDN,`"${q(r.tenCT)}"`,`"${q(r.tinhTP)}"`].join(',')));
+  } else {
+    lines=[['STT','Tên Công ty','Điện thoại','Email'].join(',')];
+    rows.forEach((r,i)=>lines.push([i+1,`"${q(r.tenCT)}"`,r.dienThoai,r.email].join(',')));
   }
+  const blob=new Blob(['\uFEFF'+lines.join('\r\n')],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`export-tab${n}-${new Date().toISOString().slice(0,10)}.csv`;a.click();
+};
 
-  // ── Render Table ──
-  function renderTable() {
-    tableBody.innerHTML = '';
-    if (rows.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="5"><div class="empty-state">
-        <div class="icon">📭</div><p>Không có dữ liệu</p>
-      </div></td></tr>`;
-      return;
-    }
-    rows.forEach((r, i) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="td-num">${i + 1}</td>
-        <td><div class="td-name" contenteditable="true">${esc(r.tenCT || '')}</div></td>
-        <td><div class="td-phone" contenteditable="true">${esc(r.dienThoai || '')}</div></td>
-        <td><div class="td-email" contenteditable="true">${esc(r.email || '')}</div></td>
-        <td><button class="del-btn" data-idx="${i}" title="Xóa">🗑</button></td>
-      `;
-      const cells = tr.querySelectorAll('[contenteditable]');
-      const keys = ['tenCT','dienThoai','email'];
-      cells.forEach((c, ci) => c.addEventListener('input', () => { rows[i][keys[ci]] = c.textContent.trim(); updateStats(); }));
-      tableBody.appendChild(tr);
-    });
-
-    tableBody.querySelectorAll('.del-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        rows.splice(parseInt(btn.dataset.idx), 1);
-        renderTable(); updateStats();
-      });
-    });
-  }
-
-  function updateStats() {
-    document.getElementById('statTotal').textContent = rows.length;
-    document.getElementById('statPhone').textContent = rows.filter(r => r.dienThoai).length;
-    document.getElementById('statEmail').textContent = rows.filter(r => r.email).length;
-    document.getElementById('exportCount').textContent = rows.length;
-  }
-
-  // ── Add Row ──
-  addRowBtn.addEventListener('click', () => {
-    rows.push({ tenCT: '', dienThoai: '', email: '' });
-    renderTable(); updateStats();
-  });
-
-  clearAllBtn.addEventListener('click', () => {
-    if (rows.length === 0) return;
-    if (!confirm(`Xóa tất cả ${rows.length} bản ghi?`)) return;
-    rows = [];
-    renderTable(); updateStats();
-  });
-
-  // ── Export XLSX ──
-  exportXLSX.addEventListener('click', () => {
-    if (!rows.length) return alert('Chưa có dữ liệu để xuất!');
-    const wsData = [
-      ['STT', 'Tên Công ty', 'Điện thoại', 'Email'],
-      ...rows.map((r, i) => [i + 1, r.tenCT, r.dienThoai, r.email])
-    ];
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-    // Style header row
-    ws['!cols'] = [{ wch: 5 }, { wch: 55 }, { wch: 18 }, { wch: 35 }];
-
-    // Auto-fit rows
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Danh sách CT');
-    const date = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(wb, `danh-sach-cong-ty-${date}.xlsx`);
-  });
-
-  // ── Export CSV ──
-  exportCSV.addEventListener('click', () => {
-    if (!rows.length) return alert('Chưa có dữ liệu để xuất!');
-    const headers = ['STT', 'Tên Công ty', 'Điện thoại', 'Email'];
-    const lines = [headers.join(',')];
-    rows.forEach((r, i) => {
-      lines.push([i+1, `"${(r.tenCT||'').replace(/"/g,'""')}"`, r.dienThoai||'', r.email||''].join(','));
-    });
-    const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `danh-sach-cong-ty-${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  // ── Helpers ──
-  function esc(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-  function showStatus(type, msg) {
-    statusBox.className = `status ${type}`;
-    statusBox.style.display = 'flex';
-    statusBox.innerHTML = type === 'loading'
-      ? `<div class="spinner"></div><span>${msg}</span>`
-      : `<span>${msg}</span>`;
-  }
+// ── Helpers ──
+function showStatus(n,type,msg) {
+  const el=document.getElementById('status'+n);
+  el.className='status '+type;el.style.display='flex';
+  el.innerHTML=type==='loading'?`<div class="spinner"></div><span>${msg}</span>`:`<span>${msg}</span>`;
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function q(s){return (s||'').replace(/"/g,'""')}
 </script>
 </body>
 </html>
